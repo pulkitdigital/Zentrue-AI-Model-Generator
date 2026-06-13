@@ -1,4 +1,4 @@
-const { rateLimit, ipKeyGenerator } = require("express-rate-limit");
+const rateLimit = require("express-rate-limit");
 
 const RATE_LIMIT = parseInt(process.env.RATE_LIMIT_PER_MINUTE || "10");
 
@@ -11,7 +11,7 @@ const limiter = rateLimit({
     success: false,
     message: "Too many requests. Please wait a minute and try again.",
   },
-  keyGenerator: (req) => ipKeyGenerator(req.ip),
+  keyGenerator: (req) => req.ip,
 });
 
 module.exports = limiter;

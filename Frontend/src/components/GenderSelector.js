@@ -1,16 +1,16 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Platform } from "react-native";
 
 const OPTIONS = [
-  { label: "Female", value: "female", icon: "♀" },
-  { label: "Male", value: "male", icon: "♂" },
+  { label: "Female", value: "female" },
+  { label: "Male",   value: "male" },
 ];
 
 export default function GenderSelector({ value, onChange }) {
   return (
     <View style={styles.container}>
       <Text style={styles.label}>Gender</Text>
-      <View style={styles.row}>
+      <View style={[styles.optionsWrap, Platform.OS === "web" && styles.optionsCol]}>
         {OPTIONS.map((opt) => {
           const isSelected = value === opt.value;
           return (
@@ -20,15 +20,12 @@ export default function GenderSelector({ value, onChange }) {
               onPress={() => onChange(opt.value)}
               activeOpacity={0.7}
             >
-              <Text style={[styles.icon, isSelected && styles.iconSelected]}>
-                {opt.icon}
-              </Text>
-              <Text style={[styles.text, isSelected && styles.textSelected]}>
-                {opt.label}
-              </Text>
               <View style={[styles.radio, isSelected && styles.radioSelected]}>
                 {isSelected && <View style={styles.radioDot} />}
               </View>
+              <Text style={[styles.text, isSelected && styles.textSelected]}>
+                {opt.label}
+              </Text>
             </TouchableOpacity>
           );
         })}
@@ -42,64 +39,59 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   label: {
-    color: "#FFFFFF",
+    color: "#111111",
     fontSize: 15,
     fontWeight: "600",
     marginBottom: 8,
   },
-  row: {
+  optionsWrap: {
     flexDirection: "row",
-    gap: 12,
+    gap: 8,
+  },
+  optionsCol: {
+    flexDirection: "column",
   },
   option: {
     flex: 1,
-    backgroundColor: "#141414",
+    backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#2A2A2A",
+    borderColor: "#E2E2E2",
     borderRadius: 10,
-    paddingVertical: 14,
-    paddingHorizontal: 14,
+    paddingVertical: 13,
+    paddingHorizontal: 12,
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
+    gap: 10,
   },
   optionSelected: {
-    borderColor: "#A855F7",
-    backgroundColor: "#1A0D2E",
-  },
-  icon: {
-    fontSize: 18,
-    color: "#555",
-  },
-  iconSelected: {
-    color: "#A855F7",
-  },
-  text: {
-    color: "#888",
-    fontSize: 14,
-    fontWeight: "500",
-    flex: 1,
-  },
-  textSelected: {
-    color: "#FFFFFF",
-    fontWeight: "600",
+    borderColor: "#7C3AED",
+    backgroundColor: "#EDE9FE",
   },
   radio: {
     width: 18,
     height: 18,
     borderRadius: 9,
     borderWidth: 1.5,
-    borderColor: "#333",
+    borderColor: "#AAAAAA",
     alignItems: "center",
     justifyContent: "center",
   },
   radioSelected: {
-    borderColor: "#A855F7",
+    borderColor: "#7C3AED",
   },
   radioDot: {
     width: 9,
     height: 9,
     borderRadius: 5,
-    backgroundColor: "#A855F7",
+    backgroundColor: "#7C3AED",
+  },
+  text: {
+    color: "#666666",
+    fontSize: 14,
+    fontWeight: "500",
+  },
+  textSelected: {
+    color: "#7C3AED",
+    fontWeight: "600",
   },
 });

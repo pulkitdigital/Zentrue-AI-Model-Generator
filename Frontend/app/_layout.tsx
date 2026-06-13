@@ -1,3 +1,4 @@
+// _layout.tsx — Light Theme
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
@@ -5,7 +6,6 @@ import * as SplashScreen from "expo-splash-screen";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { StyleSheet } from "react-native";
 
-// Prevent splash from auto-hiding
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
@@ -15,11 +15,11 @@ export default function RootLayout() {
 
   return (
     <GestureHandlerRootView style={styles.root}>
-      <StatusBar style="light" />
+      <StatusBar style="dark" />
       <Stack
         screenOptions={{
           headerShown: false,
-          contentStyle: { backgroundColor: "#0A0A0A" },
+          contentStyle: { backgroundColor: "#F8F8F8" },
           animation: "fade",
         }}
       >
@@ -28,7 +28,7 @@ export default function RootLayout() {
           name="loading"
           options={{
             animation: "fade",
-            gestureEnabled: false, // Can't swipe back during generation
+            gestureEnabled: false,
           }}
         />
         <Stack.Screen

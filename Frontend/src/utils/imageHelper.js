@@ -4,10 +4,11 @@ const MAX_FILE_SIZE_MB = 10;
 const ALLOWED_EXTENSIONS = ["jpg", "jpeg", "png", "webp"];
 
 export const validateImage = (uri, fileSizeBytes) => {
-  const ext = uri.split(".").pop()?.toLowerCase();
-
-  if (!ALLOWED_EXTENSIONS.includes(ext)) {
-    return { valid: false, error: "Please upload JPG, PNG or WEBP only." };
+  if (!uri.startsWith("blob:") && !uri.startsWith("data:")) {
+    const ext = uri.split(".").pop()?.toLowerCase().split("?")[0];
+    if (!ALLOWED_EXTENSIONS.includes(ext)) {
+      return { valid: false, error: "Please upload JPG, PNG or WEBP only." };
+    }
   }
 
   if (fileSizeBytes && fileSizeBytes > MAX_FILE_SIZE_MB * 1024 * 1024) {
@@ -17,16 +18,43 @@ export const validateImage = (uri, fileSizeBytes) => {
   return { valid: true };
 };
 
-export const saveImageToGallery = async (url) => {
-  // Web pe gallery save supported nahi hai
-  if (Platform.OS === "web") {
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `fashion_model_${Date.now()}.jpg`;
-    link.click();
-    return true;
+/**
+ * Web pe direct <a href="external-url"> download nahi hota CORS ki wajah se.
+ * Fix: fetch → blob → object URL → click → revoke
+ */
+const downloadOnWeb = async (url) => {
+  // 1. Image fetch karo as blob
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch image: ${response.status}`);
   }
 
+  const blob = await response.blob();
+
+  // 2. Temporary blob URL banao
+  const blobUrl = URL.createObjectURL(blob);
+
+  // 3. Hidden anchor tag se trigger karo download
+  const link = document.createElement("a");
+  link.href = blobUrl;
+  link.download = `fashion_model_${Date.now()}.jpg`;
+  document.body.appendChild(link);
+  link.click();
+
+  // 4. Cleanup — memory leak avoid karne ke liye
+  document.body.removeChild(link);
+  URL.revokeObjectURL(blobUrl);
+
+  return true;
+};
+
+export const saveImageToGallery = async (url) => {
+  // ─── Web ───────────────────────────────────────────────────────────────────
+  if (Platform.OS === "web") {
+    return await downloadOnWeb(url);
+  }
+
+  // ─── Native (iOS / Android) ────────────────────────────────────────────────
   const MediaLibrary = await import("expo-media-library");
   const FileSystem = await import("expo-file-system");
 
@@ -37,6 +65,7 @@ export const saveImageToGallery = async (url) => {
 
   let localUri = url;
 
+  // Remote URL → download to cache first
   if (url.startsWith("http")) {
     const filename = `fashion_model_${Date.now()}.jpg`;
     const downloadPath = `${FileSystem.cacheDirectory}${filename}`;
@@ -44,6 +73,7 @@ export const saveImageToGallery = async (url) => {
     localUri = result.uri;
   }
 
+  // Base64 data URI → write to cache
   if (url.startsWith("data:image")) {
     const base64Data = url.split(",")[1];
     const filename = `fashion_model_${Date.now()}.jpg`;

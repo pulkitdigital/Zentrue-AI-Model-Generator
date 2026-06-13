@@ -1,3 +1,4 @@
+// HomeScreen.js — Light Theme + Web max-width fix
 import React, { useState } from "react";
 import {
   View,
@@ -34,9 +35,7 @@ export default function HomeScreen() {
   const [form, setForm] = useState(DEFAULT_STATE);
   const [loading, setLoading] = useState(false);
 
-  // Required: images + ageGroup + gender
-  const isFormValid =
-    form.images.length > 0 && form.ageGroup && form.gender;
+  const isFormValid = form.images.length > 0 && form.ageGroup && form.gender;
 
   const updateField = (key, value) => {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -44,20 +43,11 @@ export default function HomeScreen() {
 
   const handleGenerate = async () => {
     if (!isFormValid) return;
-
     setLoading(true);
-
-    // Navigate to loading screen immediately for UX
-    router.push({
-      pathname: "/loading",
-      params: {
-        generations: form.generations,
-      },
-    });
-
+    router.push({ pathname: "/loading", params: { generations: form.generations } });
     try {
-      const images = await generateModels({
-        imageUris: form.images.map((img) => img.uri),
+      const generatedImages = await generateModels({
+        images: form.images,
         ageGroup: form.ageGroup,
         gender: form.gender,
         backgroundColor: form.backgroundColor,
@@ -65,26 +55,14 @@ export default function HomeScreen() {
         pose: form.pose,
         generations: form.generations,
       });
-
-      // Navigate to results with generated images
       router.replace({
         pathname: "/results",
-        params: {
-          images: JSON.stringify(images),
-          generations: form.generations,
-        },
+        params: { images: JSON.stringify(generatedImages), generations: form.generations },
       });
     } catch (error) {
       console.error("[HomeScreen] Generation error:", error.message);
-
-      // Go back from loading screen
       router.back();
-
-      Alert.alert(
-        "Generation Failed",
-        error.message || "Something went wrong. Please try again.",
-        [{ text: "OK" }]
-      );
+      Alert.alert("Generation Failed", error.message || "Something went wrong. Please try again.", [{ text: "OK" }]);
     } finally {
       setLoading(false);
     }
@@ -92,84 +70,82 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.safe}>
-      <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={styles.content}
-        showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
-      >
-        {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.title}>AI Fashion Model</Text>
-          <Text style={styles.subtitle}>
-            Upload clothing → Generate studio-quality model photos
-          </Text>
-        </View>
-
-        {/* Fields */}
-        <ImageUploader
-          images={form.images}
-          onChange={(val) => updateField("images", val)}
-        />
-
-        <View style={styles.row}>
-          <View style={styles.half}>
-            <AgeGroupSelector
-              value={form.ageGroup}
-              onChange={(val) => updateField("ageGroup", val)}
-            />
-          </View>
-          <View style={styles.half}>
-            <GenderSelector
-              value={form.gender}
-              onChange={(val) => updateField("gender", val)}
-            />
-          </View>
-        </View>
-
-        <BackgroundSelector
-          value={form.backgroundColor}
-          onChange={(val) => updateField("backgroundColor", val)}
-        />
-
-        <ModelStyleSelector
-          value={form.modelStyle}
-          onChange={(val) => updateField("modelStyle", val)}
-        />
-
-        <PoseSelector
-          value={form.pose}
-          onChange={(val) => updateField("pose", val)}
-        />
-
-        <GenerationCount
-          value={form.generations}
-          onChange={(val) => updateField("generations", val)}
-        />
-
-        {/* Required fields hint */}
-        {!isFormValid && (
-          <Text style={styles.requiredHint}>
-            {form.images.length === 0
-              ? "⬆ Upload at least one clothing image to continue"
-              : "Select age group and gender to continue"}
-          </Text>
-        )}
-
-        {/* Generate Button */}
-        <TouchableOpacity
-          style={[styles.generateBtn, !isFormValid && styles.generateBtnDisabled]}
-          onPress={handleGenerate}
-          disabled={!isFormValid || loading}
-          activeOpacity={0.85}
+      <View style={styles.centerWrap}>
+        <ScrollView
+          style={styles.scroll}
+          contentContainerStyle={styles.content}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
         >
-          <Text style={styles.generateBtnText}>
-            ✦ Generate Models
-          </Text>
-        </TouchableOpacity>
+          <View style={styles.header}>
+            <Text style={styles.title}>AI Fashion Model</Text>
+            <Text style={styles.subtitle}>
+              Upload clothing → Generate studio-quality model photos
+            </Text>
+          </View>
 
-        <View style={styles.bottomPad} />
-      </ScrollView>
+          <ImageUploader
+            images={form.images}
+            onChange={(val) => updateField("images", val)}
+          />
+
+          <View style={styles.row}>
+            <View style={styles.half}>
+              <AgeGroupSelector
+                value={form.ageGroup}
+                onChange={(val) => updateField("ageGroup", val)}
+              />
+            </View>
+            <View style={styles.half}>
+              <GenderSelector
+                value={form.gender}
+                onChange={(val) => updateField("gender", val)}
+              />
+            </View>
+          </View>
+
+          <BackgroundSelector
+            value={form.backgroundColor}
+            onChange={(val) => updateField("backgroundColor", val)}
+          />
+          <ModelStyleSelector
+            value={form.modelStyle}
+            onChange={(val) => updateField("modelStyle", val)}
+          />
+          <PoseSelector
+            value={form.pose}
+            onChange={(val) => updateField("pose", val)}
+          />
+          <GenerationCount
+            value={form.generations}
+            onChange={(val) => updateField("generations", val)}
+          />
+
+          {!isFormValid && (
+            <Text style={styles.requiredHint}>
+              {form.images.length === 0
+                ? "Upload at least one clothing image to continue"
+                : "Select age group and gender to continue"}
+            </Text>
+          )}
+
+          <TouchableOpacity
+            style={[styles.generateBtn, !isFormValid && styles.generateBtnDisabled]}
+            onPress={handleGenerate}
+            disabled={!isFormValid || loading}
+            activeOpacity={0.85}
+          >
+            <Text style={[
+              styles.generateBtnText,
+              !isFormValid && styles.generateBtnTextDisabled,
+            ]}>
+              Generate Models
+            </Text>
+          </TouchableOpacity>
+
+          <View style={styles.bottomPad} />
+        </ScrollView>
+      </View>
     </SafeAreaView>
   );
 }
@@ -177,27 +153,29 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor: "#0A0A0A",
+    backgroundColor: "#F8F8F8",
   },
-  scroll: {
+  centerWrap: {
     flex: 1,
+    width: "100%",
+    maxWidth: 640,
+    alignSelf: "center",
   },
+  scroll: { flex: 1 },
   content: {
     paddingHorizontal: 20,
     paddingTop: 20,
   },
-  header: {
-    marginBottom: 28,
-  },
+  header: { marginBottom: 28 },
   title: {
-    color: "#FFFFFF",
+    color: "#111111",
     fontSize: 26,
     fontWeight: "700",
     letterSpacing: -0.5,
     marginBottom: 6,
   },
   subtitle: {
-    color: "#666",
+    color: "#666666",
     fontSize: 13,
     lineHeight: 18,
   },
@@ -205,30 +183,28 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 12,
   },
-  half: {
-    flex: 1,
-  },
+  half: { flex: 1 },
   requiredHint: {
-    color: "#A855F7",
+    color: "#7C3AED",
     fontSize: 12,
     textAlign: "center",
     marginBottom: 14,
     opacity: 0.8,
   },
   generateBtn: {
-    backgroundColor: "#A855F7",
+    backgroundColor: "#7C3AED",
     borderRadius: 14,
     paddingVertical: 17,
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#A855F7",
+    shadowColor: "#7C3AED",
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
+    shadowOpacity: 0.25,
     shadowRadius: 12,
     elevation: 6,
   },
   generateBtnDisabled: {
-    backgroundColor: "#2A2A2A",
+    backgroundColor: "#E2E2E2",
     shadowOpacity: 0,
     elevation: 0,
   },
@@ -238,7 +214,8 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     letterSpacing: 0.3,
   },
-  bottomPad: {
-    height: 40,
+  generateBtnTextDisabled: {
+    color: "#AAAAAA",
   },
+  bottomPad: { height: 40 },
 });

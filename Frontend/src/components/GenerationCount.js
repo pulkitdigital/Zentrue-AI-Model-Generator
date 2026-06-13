@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 
-const OPTIONS = [1, 2, 4, 8];
+const OPTIONS = [1, 2, 3, 4];
 
 export default function GenerationCount({ value, onChange }) {
   return (
@@ -39,7 +39,7 @@ export default function GenerationCount({ value, onChange }) {
       </View>
       <Text style={styles.hint}>
         {value === 8
-          ? "⚡ More images = longer wait time"
+          ? "More images — longer wait time"
           : value === 1
           ? "Fast generation"
           : `Generates ${value} variations`}
@@ -51,16 +51,16 @@ export default function GenerationCount({ value, onChange }) {
 const styles = StyleSheet.create({
   container: { marginBottom: 28 },
   label: {
-    color: "#FFFFFF",
+    color: "#111111",
     fontSize: 15,
     fontWeight: "600",
     marginBottom: 10,
   },
   segmented: {
     flexDirection: "row",
-    backgroundColor: "#141414",
+    backgroundColor: "#F8F8F8",
     borderWidth: 1,
-    borderColor: "#2A2A2A",
+    borderColor: "#E2E2E2",
     borderRadius: 10,
     overflow: "hidden",
   },
@@ -70,7 +70,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     borderRightWidth: 1,
-    borderRightColor: "#2A2A2A",
+    borderRightColor: "#E2E2E2",
   },
   segmentFirst: {
     borderTopLeftRadius: 9,
@@ -82,10 +82,10 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 9,
   },
   segmentSelected: {
-    backgroundColor: "#A855F7",
+    backgroundColor: "#7C3AED",
   },
   segmentText: {
-    color: "#666",
+    color: "#AAAAAA",
     fontSize: 15,
     fontWeight: "600",
   },
@@ -93,7 +93,7 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
   },
   hint: {
-    color: "#555",
+    color: "#AAAAAA",
     fontSize: 11,
     marginTop: 7,
   },

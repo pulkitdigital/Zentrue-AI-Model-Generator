@@ -1,3 +1,4 @@
+// LoadingScreen.js — Light Theme
 import React, { useEffect, useRef, useState } from "react";
 import {
   View,
@@ -82,7 +83,7 @@ export default function LoadingScreen() {
       <View style={styles.container}>
 
         {/* Spinner */}
-        <Animated.Scale style={{ transform: [{ scale: pulseAnim }] }}>
+        <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
           <View style={styles.spinnerWrapper}>
             <Animated.View
               style={[styles.spinner, { transform: [{ rotate: spin }] }]}
@@ -91,7 +92,7 @@ export default function LoadingScreen() {
               <Text style={styles.spinnerIcon}>✦</Text>
             </View>
           </View>
-        </Animated.Scale>
+        </Animated.View>
 
         {/* Status text */}
         <Animated.Text style={[styles.message, { opacity: fadeAnim }]}>
@@ -114,7 +115,7 @@ export default function LoadingScreen() {
 const styles = StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor: "#0A0A0A",
+    backgroundColor: "#F8F8F8",
   },
   container: {
     flex: 1,
@@ -137,37 +138,37 @@ const styles = StyleSheet.create({
     borderRadius: 45,
     borderWidth: 2.5,
     borderColor: "transparent",
-    borderTopColor: "#A855F7",
-    borderRightColor: "#A855F730",
+    borderTopColor: "#7C3AED",
+    borderRightColor: "#7C3AED30",
   },
   spinnerInner: {
     width: 62,
     height: 62,
     borderRadius: 31,
-    backgroundColor: "#1A0D2E",
+    backgroundColor: "#EDE9FE",
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
-    borderColor: "#A855F730",
+    borderColor: "#7C3AED30",
   },
   spinnerIcon: {
-    color: "#A855F7",
+    color: "#7C3AED",
     fontSize: 22,
   },
   message: {
-    color: "#FFFFFF",
+    color: "#111111",
     fontSize: 18,
     fontWeight: "600",
     textAlign: "center",
     letterSpacing: -0.3,
   },
   subtext: {
-    color: "#555",
+    color: "#666666",
     fontSize: 13,
     textAlign: "center",
   },
   warning: {
-    color: "#333",
+    color: "#AAAAAA",
     fontSize: 12,
     textAlign: "center",
     position: "absolute",

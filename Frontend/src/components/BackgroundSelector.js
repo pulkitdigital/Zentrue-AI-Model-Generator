@@ -1,45 +1,38 @@
-import React, { useState } from "react";
+// BackgroundSelector.js — Light Theme + Color Picker
+import React, { useState, useRef } from "react";
 import {
   View,
   Text,
   TouchableOpacity,
   StyleSheet,
-  TextInput,
+  Platform,
 } from "react-native";
 
 const PRESETS = [
-  { label: "White", value: "#FFFFFF" },
-  { label: "Grey", value: "#CCCCCC" },
-  { label: "Black", value: "#000000" },
-  { label: "Cream", value: "#F5F0E8" },
-  { label: "Blue", value: "#E8F0FE" },
+  { label: "White",  value: "#FFFFFF" },
+  { label: "Grey",   value: "#CCCCCC" },
+  { label: "Black",  value: "#000000" },
+  { label: "Cream",  value: "#F5F0E8" },
+  { label: "Blue",   value: "#E8F0FE" },
 ];
 
 const HEX_REGEX = /^#([0-9A-Fa-f]{6})$/;
 
 export default function BackgroundSelector({ value, onChange }) {
-  const [customHex, setCustomHex] = useState("");
-  const [hexError, setHexError] = useState("");
+  const [customColor, setCustomColor] = useState("#FFFFFF");
+  const colorInputRef = useRef(null);
 
   const isPreset = PRESETS.some((p) => p.value === value);
   const isCustomActive = !isPreset && HEX_REGEX.test(value);
 
-  const handleCustomChange = (text) => {
-    // Auto prefix #
-    let hex = text.trim();
-    if (hex && !hex.startsWith("#")) hex = `#${hex}`;
-    setCustomHex(hex);
+  const handleCustomPick = (hex) => {
+    setCustomColor(hex);
+    onChange(hex);
+  };
 
-    if (hex === "" || hex === "#") {
-      setHexError("");
-      return;
-    }
-
-    if (HEX_REGEX.test(hex)) {
-      setHexError("");
-      onChange(hex);
-    } else {
-      setHexError("Enter a valid hex e.g. #FF5733");
+  const openPicker = () => {
+    if (Platform.OS === "web") {
+      colorInputRef.current?.click();
     }
   };
 
@@ -61,11 +54,7 @@ export default function BackgroundSelector({ value, onChange }) {
                 isSelected && styles.swatchSelected,
                 isDark && styles.swatchDark,
               ]}
-              onPress={() => {
-                onChange(preset.value);
-                setCustomHex("");
-                setHexError("");
-              }}
+              onPress={() => onChange(preset.value)}
               activeOpacity={0.7}
             >
               {isSelected && (
@@ -74,41 +63,71 @@ export default function BackgroundSelector({ value, onChange }) {
             </TouchableOpacity>
           );
         })}
+
+        {/* Custom color swatch — picker trigger */}
+        <TouchableOpacity
+          style={[
+            styles.swatch,
+            styles.swatchCustom,
+            { backgroundColor: isCustomActive ? value : customColor },
+            isCustomActive && styles.swatchSelected,
+          ]}
+          onPress={openPicker}
+          activeOpacity={0.7}
+        >
+          {/* Gradient-like indicator */}
+          {!isCustomActive && (
+            <Text style={styles.customIcon}>+</Text>
+          )}
+          {isCustomActive && (
+            <Text style={styles.tick}>✓</Text>
+          )}
+
+          {/* Hidden native color input — web only */}
+          {Platform.OS === "web" && (
+            <input
+              ref={colorInputRef}
+              type="color"
+              value={isCustomActive ? value : customColor}
+              onChange={(e) => handleCustomPick(e.target.value)}
+              style={{
+                position: "absolute",
+                width: 0,
+                height: 0,
+                opacity: 0,
+                border: "none",
+                padding: 0,
+                cursor: "pointer",
+              }}
+            />
+          )}
+        </TouchableOpacity>
       </View>
 
-      {/* Preset labels */}
+      {/* Labels row */}
       <View style={styles.labelsRow}>
         {PRESETS.map((preset) => (
           <Text key={preset.value} style={styles.swatchLabel}>
             {preset.label}
           </Text>
         ))}
+        <Text style={styles.swatchLabel}>Custom</Text>
       </View>
 
-      {/* Custom hex input */}
-      <View style={styles.customRow}>
-        <View
-          style={[
-            styles.colorPreview,
-            {
-              backgroundColor:
-                isCustomActive ? value : HEX_REGEX.test(customHex) ? customHex : "#1A1A1A",
-            },
-            isCustomActive && styles.colorPreviewActive,
-          ]}
-        />
-        <TextInput
-          style={[styles.hexInput, hexError ? styles.hexInputError : null]}
-          placeholder="Custom  #RRGGBB"
-          placeholderTextColor="#444"
-          value={customHex}
-          onChangeText={handleCustomChange}
-          maxLength={7}
-          autoCapitalize="characters"
-          autoCorrect={false}
-        />
-      </View>
-      {hexError ? <Text style={styles.errorText}>{hexError}</Text> : null}
+      {/* Selected custom color display */}
+      {isCustomActive && (
+        <TouchableOpacity style={styles.customRow} onPress={openPicker} activeOpacity={0.7}>
+          <View
+            style={[
+              styles.colorPreview,
+              { backgroundColor: value },
+              styles.colorPreviewActive,
+            ]}
+          />
+          <Text style={styles.hexDisplay}>{value.toUpperCase()}</Text>
+          <Text style={styles.changeTap}>Tap to change</Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 }
@@ -118,7 +137,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   label: {
-    color: "#FFFFFF",
+    color: "#111111",
     fontSize: 15,
     fontWeight: "600",
     marginBottom: 12,
@@ -135,22 +154,32 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
-    borderColor: "#2A2A2A",
+    borderColor: "#E2E2E2",
   },
   swatchSelected: {
     borderWidth: 2.5,
-    borderColor: "#A855F7",
+    borderColor: "#7C3AED",
   },
   swatchDark: {
-    borderColor: "#444",
+    borderColor: "#888888",
+  },
+  swatchCustom: {
+    overflow: "hidden",
+    position: "relative",
+  },
+  customIcon: {
+    fontSize: 20,
+    color: "#AAAAAA",
+    fontWeight: "300",
+    lineHeight: 24,
   },
   tick: {
     fontSize: 16,
-    color: "#333",
+    color: "#333333",
     fontWeight: "700",
   },
   tickLight: {
-    color: "#EEE",
+    color: "#EEEEEE",
   },
   labelsRow: {
     flexDirection: "row",
@@ -160,44 +189,39 @@ const styles = StyleSheet.create({
   swatchLabel: {
     width: 44,
     textAlign: "center",
-    color: "#555",
+    color: "#AAAAAA",
     fontSize: 10,
   },
   customRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
-  },
-  colorPreview: {
-    width: 38,
-    height: 38,
-    borderRadius: 8,
+    backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#2A2A2A",
-  },
-  colorPreviewActive: {
-    borderColor: "#A855F7",
-    borderWidth: 2,
-  },
-  hexInput: {
-    flex: 1,
-    backgroundColor: "#141414",
-    borderWidth: 1,
-    borderColor: "#2A2A2A",
+    borderColor: "#E2E2E2",
     borderRadius: 10,
     paddingHorizontal: 14,
     paddingVertical: 10,
-    color: "#FFFFFF",
+  },
+  colorPreview: {
+    width: 22,
+    height: 22,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: "#E2E2E2",
+  },
+  colorPreviewActive: {
+    borderColor: "#7C3AED",
+    borderWidth: 2,
+  },
+  hexDisplay: {
+    flex: 1,
+    color: "#111111",
     fontSize: 14,
     fontFamily: "monospace",
   },
-  hexInputError: {
-    borderColor: "#EF4444",
-  },
-  errorText: {
-    color: "#EF4444",
-    fontSize: 11,
-    marginTop: 5,
-    marginLeft: 48,
+  changeTap: {
+    color: "#7C3AED",
+    fontSize: 12,
   },
 });
